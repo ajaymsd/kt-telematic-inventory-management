@@ -1,0 +1,80 @@
+const { PrismaClient } = require('@prisma/client');
+const { validationResult } = require('express-validator');
+const prisma = new PrismaClient();
+
+const addSupplier = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
+
+    try {
+        const { name, contact } = req.body;
+        const supplier = await prisma.supplier.create({
+            data: {
+                name,
+                contact,
+                createdBy: req.session.userId
+            }
+        });
+        res.json(supplier);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to add supplier' });
+    }
+};
+
+const getSuppliers = async (req, res) => {
+    try {
+        const suppliers = await prisma.supplier.findMany({
+            include: { products: true, user: true }
+        });
+        res.json(suppliers);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch suppliers' });
+    }
+};
+
+const getSupplier = async (req, res) => {
+    try {
+        const supplier = await prisma.supplier.findUnique({
+            where: { id: parseInt(req.params.id) },
+            include: { products: true, user: true }
+        });
+        if (!supplier) return res.status(404).json({ error: 'Supplier not found' });
+        res.json(supplier);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch supplier' });
+    }
+};
+
+const updateSupplier = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
+
+    try {
+        const { name, contact } = req.body;
+        const supplier = await prisma.supplier.update({
+            where: { id: parseInt(req.params.id) },
+            data: { name, contact }
+        });
+        res.json(supplier);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to update supplier' });
+    }
+};
+
+const deleteSupplier = async (req, res) => {
+    try {
+        await prisma.supplier.delete({
+            where: { id: parseInt(req.params.id) }
+        });
+        res.json({ message: 'Supplier deleted' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to delete supplier' });
+    }
+};
+
+module.exports = { addSupplier, getSuppliers, getSupplier, updateSupplier, deleteSupplier };
