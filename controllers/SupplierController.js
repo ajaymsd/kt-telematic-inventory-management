@@ -5,7 +5,12 @@ const prisma = new PrismaClient();
 const addSupplier = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({ error: 'Validation failed', details: errors.array() });
+       const formattedErrors = errors.array().map(err => ({
+        field: err.param,
+        error: err.msg
+    }));
+
+    return res.status(422).json({ errors: formattedErrors });
     }
 
     try {
