@@ -1,5 +1,5 @@
 const express = require('express');
-const { addSupplier, getSuppliers, getSupplier, deleteSupplier, updateSupplier } = require('../controllers/SupplierController');
+const { addSupplier, getSuppliers, getSupplier, deleteSupplier, updateSupplier } = require('../../controllers/SupplierController');
 
 const router = express.Router();
 

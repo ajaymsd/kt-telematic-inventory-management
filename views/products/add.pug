@@ -1,0 +1,46 @@
+doctype html
+html
+  head
+    title Add Product
+    meta(charset="utf-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1")
+
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css")
+
+  body
+    .container.mt-5
+      h1.mb-4 Add New Product
+
+      form(method="POST", action="/api/v1/products")
+        .mb-3
+          label.form-label(for="name") Product Name
+          input.form-control(type="text", name="name", required=true)
+
+        .mb-3
+          label.form-label(for="sku") SKU
+          input.form-control(type="text", name="sku", required=true)
+
+        .mb-3
+          label.form-label(for="price") Price
+          input.form-control(type="number", name="price", step="0.01", required=true)
+
+        .mb-3
+          label.form-label(for="quantity") Quantity
+          input.form-control(type="number", name="quantity", required=true)
+
+        .mb-3
+          label.form-label(for="category") Category
+          input.form-control(type="text", name="category", required=true)
+
+        .mb-3
+          label.form-label(for="supplierId") Supplier (Optional)
+          select.form-select(name="supplierId")
+            option(value="") -- Select Supplier --
+            each supplier in suppliers
+              option(value=supplier.id)= supplier.name
+
+        button.btn.btn-primary(type="submit") Add Product
+
+      a.btn.btn-secondary.mt-3(href="/products") Back to Product List
+
+    script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js")

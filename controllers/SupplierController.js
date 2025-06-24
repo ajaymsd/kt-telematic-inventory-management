@@ -4,7 +4,9 @@ const prisma = new PrismaClient();
 
 const addSupplier = async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ error: 'Validation failed', details: errors.array() });
+    }
 
     try {
         const { name, contact } = req.body;
@@ -12,10 +14,10 @@ const addSupplier = async (req, res) => {
             data: {
                 name,
                 contact,
-                createdBy: req.session.userId
+                createdBy: req.userId
             }
         });
-        res.json(supplier);
+        res.json({ message: 'Supplier added successfully', data: supplier });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to add supplier' });
@@ -25,9 +27,10 @@ const addSupplier = async (req, res) => {
 const getSuppliers = async (req, res) => {
     try {
         const suppliers = await prisma.supplier.findMany({
-            include: { products: true, user: true }
+            include: { products: true, user: true },
+            where: { createdBy: req.userId},
         });
-        res.json(suppliers);
+        res.json({ message: 'Suppliers fetched successfully', data: suppliers });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to fetch suppliers' });
@@ -40,8 +43,10 @@ const getSupplier = async (req, res) => {
             where: { id: parseInt(req.params.id) },
             include: { products: true, user: true }
         });
-        if (!supplier) return res.status(404).json({ error: 'Supplier not found' });
-        res.json(supplier);
+        if (!supplier) {
+            return res.status(404).json({ error: 'Supplier not found' });
+        }
+        res.json({ message: 'Supplier fetched successfully', data: supplier });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to fetch supplier' });
@@ -50,7 +55,9 @@ const getSupplier = async (req, res) => {
 
 const updateSupplier = async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ error: 'Validation failed', details: errors.array() });
+    }
 
     try {
         const { name, contact } = req.body;
@@ -58,7 +65,7 @@ const updateSupplier = async (req, res) => {
             where: { id: parseInt(req.params.id) },
             data: { name, contact }
         });
-        res.json(supplier);
+        res.json({ message: 'Supplier updated successfully', data: supplier });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to update supplier' });
@@ -70,11 +77,58 @@ const deleteSupplier = async (req, res) => {
         await prisma.supplier.delete({
             where: { id: parseInt(req.params.id) }
         });
-        res.json({ message: 'Supplier deleted' });
+        res.json({ message: 'Supplier deleted successfully' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to delete supplier' });
     }
 };
 
-module.exports = { addSupplier, getSuppliers, getSupplier, updateSupplier, deleteSupplier };
+const renderSuppliersListPage = async(req,res) =>{
+     try {
+        const suppliers = await prisma.supplier.findMany({
+            include: { products: true, user: true },
+             where:{createdBy:req.userId}
+        });
+        res.render('suppliers/list',{suppliers});
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch suppliers' });
+    }
+}
+
+const renderSuppliersEditPage = async(req,res) => {
+    try {
+        const supplier = await prisma.supplier.findUnique({
+            where: { id: parseInt(req.params.id) },
+            include: { products: true, user: true }
+        });
+        if (!supplier) {
+            return res.status(404).json({ error: 'Supplier not found' });
+        }
+        res.render('suppliers/edit',{supplier});
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch supplier' });
+    }
+}
+
+const renderSuppliersAddPage = async(req,res) => {
+    try {
+        res.render('suppliers/add');
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch products' });
+    }
+}
+
+module.exports = {
+    addSupplier,
+    getSuppliers,
+    getSupplier,
+    updateSupplier,
+    deleteSupplier,
+    renderSuppliersListPage,
+    renderSuppliersAddPage,
+    renderSuppliersEditPage
+};
