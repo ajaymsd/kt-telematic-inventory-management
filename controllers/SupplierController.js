@@ -22,7 +22,10 @@ const addSupplier = async (req, res) => {
                 createdBy: req.userId
             }
         });
-        res.json({ message: 'Supplier added successfully', data: supplier });
+
+        if (supplier) {
+          res.redirect('/suppliers');
+        }
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to add supplier' });
@@ -70,7 +73,9 @@ const updateSupplier = async (req, res) => {
             where: { id: parseInt(req.params.id) },
             data: { name, contact }
         });
-        res.json({ message: 'Supplier updated successfully', data: supplier });
+        if (supplier) {
+            res.redirect('/suppliers');
+        }
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to update supplier' });
@@ -82,7 +87,7 @@ const deleteSupplier = async (req, res) => {
         await prisma.supplier.delete({
             where: { id: parseInt(req.params.id) }
         });
-        res.json({ message: 'Supplier deleted successfully' });
+        res.redirect('/suppliers');
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to delete supplier' });

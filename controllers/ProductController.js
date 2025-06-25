@@ -21,7 +21,9 @@ const addProduct = async (req, res) => {
                 createdBy: req.userId
             }
         });
-        res.json({ message: 'Product added successfully', data: product });
+        if (product) {
+            res.redirect('/products');
+        }
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to add product' });
@@ -75,7 +77,9 @@ const updateProduct = async (req, res) => {
                 supplierId: supplierId ? parseInt(supplierId) : null
             }
         });
-        res.json({ message: 'Product updated successfully', data: product });
+         if (product) {
+            res.redirect('/products');
+        }
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to update product' });
