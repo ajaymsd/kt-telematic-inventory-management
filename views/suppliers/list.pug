@@ -19,7 +19,6 @@ html
               th ID
               th Name
               th Contact
-              th Created By
               th Total Products
               th Action
           tbody
@@ -28,7 +27,6 @@ html
                 td= supplier.id
                 td= supplier.name
                 td= supplier.contact
-                td= supplier.user ? supplier.user.name : 'N/A'
                 td= supplier.products ? supplier.products.length : 0
                 td
                   a.btn.btn-sm.btn-warning(href=`/suppliers/edit/${supplier.id}`) Edit
